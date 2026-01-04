@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp iOS - Pro</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+
+<body>
+    <div id="app" class="app-container">
+        <!-- Screens will be injected here -->
+        <div id="screen-container"></div>
+
+        <!-- iOS Bottom Navigation -->
+        <nav class="bottom-nav" id="main-nav">
+            <button class="nav-item" data-screen="status">
+                <span class="icon"><i class="fa-solid fa-circle-notch"></i></span>
+                <span class="label">Updates</span>
+            </button>
+            <button class="nav-item" data-screen="calls">
+                <span class="icon"><i class="fa-solid fa-phone"></i></span>
+                <span class="label">Calls</span>
+            </button>
+            <button class="nav-item" data-screen="camera">
+                <span class="icon"><i class="fa-solid fa-users"></i></span>
+                <span class="label">Communities</span>
+            </button>
+            <button class="nav-item active" data-screen="chats">
+                <span class="icon"><i class="fa-solid fa-comment"></i></span>
+                <span class="label">Chats</span>
+            </button>
+            <button class="nav-item" data-screen="settings">
+                <span class="icon"><i class="fa-solid fa-gear"></i></span>
+                <span class="label">Settings</span>
+            </button>
+        </nav>
+
+        <!-- Emoji Picker Overlay -->
+        <div id="emoji-picker" class="emoji-picker hidden">
+            <div class="emoji-header">
+                <span>Frequently Used</span>
+            </div>
+            <div class="emoji-grid" id="emoji-grid">
+                <!-- Emojis injected here -->
+            </div>
+        </div>
+
+        <!-- Call Overlay -->
+        <div id="call-overlay" class="screen call-screen hidden">
+            <!-- Injected via JS -->
+        </div>
+
+        <!-- Status Overly -->
+        <div id="status-overlay" class="screen status-viewer hidden">
+            <!-- Injected via JS -->
+        </div>
+
+        <!-- Add Contact Modal -->
+        <div id="contact-modal" class="modal hidden">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <button class="text-btn" id="modal-cancel">Cancel</button>
+                    <h2>New Contact</h2>
+                    <button class="text-btn bold" id="modal-save">Save</button>
+                </header>
+                <div class="modal-body">
+                    <div class="avatar-placeholder">
+                        <div class="avatar-circle">Add Photo</div>
+                    </div>
+                    <div class="input-group-ios">
+                        <input type="text" placeholder="First Name" id="contact-fname">
+                        <input type="text" placeholder="Last Name" id="contact-lname">
+                    </div>
+                    <div class="input-group-ios">
+                        <input type="text" placeholder="Phone" id="contact-phone">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Templates -->
+    <template id="status-template">
+        <div class="screen status-screen">
+            <header class="ios-header no-search">
+                <div class="header-top-actions">
+                    <button class="text-btn">Privacy</button>
+                </div>
+                <div class="header-main">
+                    <h1>Status</h1>
+                </div>
+            </header>
+            <div class="settings-content">
+                <div class="status-me-section">
+                    <div class="status-avatar-wrapper">
+                        <div class="avatar large">
+                            <img src="" id="status-my-avatar">
+                        </div>
+                        <div class="add-status-icon">+</div>
+                    </div>
+                    <div class="status-info">
+                        <h3>My Status</h3>
+                        <p>Add to my status</p>
+                    </div>
+                    <div class="status-actions">
+                        <button class="status-action-btn"><i class="fa-solid fa-camera"></i></button>
+                        <button class="status-action-btn"><i class="fa-solid fa-pen"></i></button>
+                    </div>
+                </div>
+
+                <div class="settings-group-title">RECENT UPDATES</div>
+                <div class="status-list" id="status-recent">
+                    <!-- Status items injected here -->
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="calls-template">
+        <div class="screen calls-screen">
+            <header class="ios-header no-search">
+                <div class="header-top-actions">
+                    <button class="text-btn">Edit</button>
+                    <div class="segment-control">
+                        <button class="segment active" data-filter="all">All</button>
+                        <button class="segment" data-filter="missed">Missed</button>
+                    </div>
+                    <button class="icon-btn-blue"><i class="fa-solid fa-phone-flip"></i></button>
+                </div>
+                <div class="header-main">
+                    <h1>Calls</h1>
+                </div>
+                <div class="search-bar-container">
+                    <div class="search-bar">
+                        <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <input type="text" placeholder="Search">
+                    </div>
+                </div>
+            </header>
+            <div class="chat-items-container" id="calls-list">
+                <!-- Calls injected here -->
+            </div>
+        </div>
+    </template>
+
+    <template id="communities-template">
+        <div class="screen communities-screen">
+            <header class="ios-header no-search">
+                <div class="header-main">
+                    <h1>Communities</h1>
+                </div>
+            </header>
+            <div class="settings-content"
+                style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center;">
+                <div style="font-size: 80px; margin-bottom: 20px;">👥</div>
+                <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 10px;">Stay connected with communities</h2>
+                <p style="color: var(--ios-text-sec); font-size: 15px; margin-bottom: 30px;">Communities bring members
+                    together in topic-based groups, and make it easy to get admin announcements.</p>
+                <button class="text-btn bold"
+                    style="background: var(--ios-blue); color: white; padding: 10px 20px; border-radius: 20px;">Start
+                    your community</button>
+            </div>
+        </div>
+    </template>
+
+    <template id="chat-list-template">
+        <div class="screen chat-list-screen">
+            <header class="ios-header no-search">
+                <div class="header-top-actions">
+                    <button class="text-btn">Edit</button>
+                    <button class="icon-btn-blue" id="new-chat-btn"><i class="fa-regular fa-pen-to-square"></i></button>
+                </div>
+                <div class="header-main">
+                    <h1>Chats</h1>
+                </div>
+                <div class="chat-header-sub">
+                    <button class="text-btn">Broadcast Lists</button>
+                    <button class="text-btn">New Group</button>
+                </div>
+                <div class="search-bar-container">
+                    <div class="search-bar">
+                        <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <input type="text" placeholder="Search">
+                    </div>
+                </div>
+            </header>
+            <div class="chat-items-container" id="chat-list">
+                <!-- Chat items injected here -->
+            </div>
+        </div>
+    </template>
+
+    <template id="chat-view-template">
+        <div class="screen chat-view-screen">
+            <header class="ios-chat-header">
+                <div class="header-left">
+                    <button class="back-btn">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span class="unread-back-count">12</span>
+                    </button>
+                    <div class="user-info" id="chat-header-user">
+                        <div class="avatar" id="active-chat-avatar"></div>
+                        <div class="details">
+                            <h2 id="active-chat-name">User Name</h2>
+                            <p id="active-chat-status">online</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="icon-btn-blue" id="chat-video-btn"><i class="fa-solid fa-video"></i></button>
+                    <button class="icon-btn-blue" id="chat-voice-btn"><i class="fa-solid fa-phone"></i></button>
+                </div>
+            </header>
+            <div class="messages-container" id="messages-list">
+                <!-- Messages injected here -->
+            </div>
+            <footer class="ios-input-area">
+                <button class="plus-btn"><i class="fa-solid fa-plus"></i></button>
+                <div class="input-wrapper-ios">
+                    <input type="text" placeholder="" id="message-input">
+                    <button class="sticker-btn" id="emoji-btn-toggle"><i class="fa-regular fa-face-smile"></i></button>
+                </div>
+                <div class="right-input-actions">
+                    <button class="icon-btn-gray"><i class="fa-solid fa-camera"></i></button>
+                    <button class="icon-btn-gray" id="mic-btn"><i class="fa-solid fa-microphone"></i></button>
+                    <button class="send-btn-ios" id="send-btn" style="display:none;"><i
+                            class="fa-solid fa-arrow-up"></i></button>
+                </div>
+            </footer>
+        </div>
+    </template>
+
+    <template id="settings-template">
+        <div class="screen settings-screen">
+            <header class="ios-header-settings">
+                <div class="header-main">
+                    <h1>Settings</h1>
+                </div>
+                <div class="search-bar-container">
+                    <div class="search-bar">
+                        <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <input type="text" placeholder="Search">
+                    </div>
+                </div>
+            </header>
+            <div class="settings-content-inset">
+                <!-- Group 1: Profile -->
+                <div class="settings-group-inset">
+                    <div class="settings-profile-item" id="profile-edit-trigger">
+                        <div class="avatar large">
+                            <img src="" alt="My Profile" id="my-avatar-img">
+                        </div>
+                        <div class="profile-info">
+                            <h3 id="my-name-display">Name</h3>
+                            <p id="my-bio-display">Bio</p>
+                        </div>
+                        <div class="qr-code-icon"><i class="fa-solid fa-qrcode"></i></div>
+                        <span class="chevron-right"><i class="fa-solid fa-chevron-right"></i></span>
+                    </div>
+                    <div class="settings-item-inset">
+                        <span class="s-icon-ios s-blue"><i class="fa-solid fa-face-smile"></i></span>
+                        <span>Avatar</span>
+                        <span class="chevron-right"><i class="fa-solid fa-chevron-right"></i></span>
+                    </div>
+                </div>
+
+                <!-- Group 2: Account & Chats -->
+                <div class="settings-group-inset">
+                    <div class="settings-item-inset">
+                        <span class="s-icon-ios s-blue"><i class="fa-solid fa-star"></i></span>
+                        <span>Starred Messages</span>
+                        <span class="chevron-right"><i class="fa-solid fa-chevron-right"></i></span>
+                    </div>
+                    <div class="settings-item-inset">
+                        <span class="s-icon-ios s-whatsapp"><i class="fa-solid fa-laptop"></i></span>
+                        <span>Linked Devices</span>
+                        <span class="chevron-right"><i class="fa-solid fa-chevron-right"></i></span>
+                    </div>
+                </div>
+
+                <!-- Group 3: Core Settings -->
+                <div class="settings-group-inset">
+                    <div class="settings-item-inset">
+                        <span class="s-icon-ios s-blue"><i class="fa-solid fa-key"></i></span>
+                        <span>Account</span>
+                        <span class="chevron-right"><i class="fa-solid fa-chevron-right"></i></span>
+                    </div>
+                    <div class="settings-item-inset">
+                        <span class="s-icon-ios s-blue-light"><i class="fa-solid fa-lock"></i></span>
+                        <span>Privacy</span>
+                        <span class="chevron-right"><i class="fa-solid fa-chevron-right"></i></span>
+                    </div>
+                    <div class="settings-item-inset">
+                        <span class="s-icon-ios s-green"><i class="fa-brands fa-whatsapp"></i></span>
+                        <span>Chats</span>
+                        <span class="badge-ios">12</span>
+                        <span class="chevron-right"><i class="fa-solid fa-chevron-right"></i></span>
+                    </div>
+                    <div class="settings-item-inset">
+                        <span class="s-icon-ios s-red"><i class="fa-solid fa-bell"></i></span>
+                        <span>Notifications</span>
+                        <span class="chevron-right"><i class="fa-solid fa-chevron-right"></i></span>
+                    </div>
+                    <div class="settings-item-inset">
+                        <span class="s-icon-ios s-green-bright"><i class="fa-solid fa-arrow-up-right-dots"></i></span>
+                        <span>Storage and Data</span>
+                        <span class="chevron-right"><i class="fa-solid fa-chevron-right"></i></span>
+                    </div>
+                </div>
+
+                <!-- Group 4: Extras -->
+                <div class="settings-group-inset">
+                    <div class="settings-item-inset">
+                        <span class="s-icon-ios s-blue"><i class="fa-solid fa-circle-info"></i></span>
+                        <span>Help</span>
+                        <span class="chevron-right"><i class="fa-solid fa-chevron-right"></i></span>
+                    </div>
+                    <div class="settings-item-inset">
+                        <span class="s-icon-ios s-red"><i class="fa-solid fa-heart"></i></span>
+                        <span>Tell a Friend</span>
+                        <span class="chevron-right"><i class="fa-solid fa-chevron-right"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- NEW: CALL SCREEN TEMPLATE -->
+    <template id="call-screen-template">
+        <div class="call-screen-content">
+            <div class="call-bg-blur"></div>
+            <div class="call-top">
+                <span class="call-privacy-text"><i class="fa-solid fa-lock"></i> End-to-end encrypted</span>
+                <div class="call-user">
+                    <div class="avatar xlarge" id="call-avatar"></div>
+                    <h1 id="call-name">Name</h1>
+                    <p id="call-status">Calling...</p>
+                </div>
+            </div>
+            <div class="call-bottom-controls">
+                <div class="call-ctrl-group">
+                    <button class="call-ctrl-btn"><i class="fa-solid fa-volume-high"></i><span>speaker</span></button>
+                    <button class="call-ctrl-btn"><i class="fa-solid fa-video-slash"></i><span>video</span></button>
+                    <button class="call-ctrl-btn"><i class="fa-solid fa-microphone-slash"></i><span>mute</span></button>
+                </div>
+                <button class="end-call-btn" id="end-call-btn"><i class="fa-solid fa-phone-slash"></i></button>
+            </div>
+        </div>
+    </template>
+
+    <!-- NEW: STATUS VIEWER TEMPLATE -->
+    <template id="status-viewer-template">
+        <div class="status-viewer-content">
+            <div class="status-progress-bar" id="status-progress-container">
+                <!-- segments injected -->
+            </div>
+            <header class="status-viewer-header">
+                <div class="status-user-info">
+                    <div class="avatar small" id="status-viewer-avatar"></div>
+                    <div class="status-details">
+                        <h4 id="status-viewer-name">Name</h4>
+                        <span id="status-viewer-time">Time</span>
+                    </div>
+                </div>
+                <button class="status-close-btn" id="status-close-btn"><i class="fa-solid fa-xmark"></i></button>
+            </header>
+            <div class="status-media">
+                <img src="" id="status-viewer-img">
+            </div>
+            <footer class="status-viewer-footer">
+                <i class="fa-solid fa-chevron-up"></i>
+                <span>Reply</span>
+            </footer>
+        </div>
+    </template>
+
+    <template id="profile-editor-template">
+        <div class="screen profile-editor-screen">
+            <header class="ios-header no-search">
+                <div class="header-top-actions">
+                    <button class="back-btn-text" id="profile-back-btn">
+                        <i class="fa-solid fa-chevron-left"></i> Settings
+                    </button>
+                    <button class="text-btn bold" id="profile-save-btn">Done</button>
+                </div>
+                <div class="header-main">
+                    <h1>Edit Profile</h1>
+                </div>
+            </header>
+            <div class="profile-editor-content">
+                <div class="avatar-edit-section">
+                    <div class="avatar xlarge">
+                        <img src="" id="edit-avatar-preview">
+                    </div>
+                    <button class="text-btn-blue" id="change-photo-btn">Edit</button>
+                    <input type="text" id="avatar-url-input" placeholder="Image URL..." class="hidden-input">
+                </div>
+                <div class="settings-group-title">NAME</div>
+                <div class="input-group-ios no-margin">
+                    <input type="text" placeholder="Your Name" id="edit-profile-name">
+                </div>
+                <p class="input-subtitle">Thawa ayata penne me nama thamai.</p>
+                <div class="settings-group-title">ABOUT</div>
+                <div class="input-group-ios no-margin">
+                    <input type="text" placeholder="About" id="edit-profile-bio">
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js');
+            });
+        }
+    </script>
+</body>
+
+</html>
